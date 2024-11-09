@@ -4,11 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
-import 'package:medicine/database/repository.dart';
-import 'package:medicine/helpers/snack_bar.dart';
-import 'package:medicine/models/medicine_type.dart';
-import 'package:medicine/models/pill.dart';
-import 'package:medicine/notifications/notifications.dart';
+import 'package:medicines/database/repository.dart';
+import 'package:medicines/helpers/snack_bar.dart';
+import 'package:medicines/models/medicine_type.dart';
+import 'package:medicines/models/pill.dart';
+import 'package:medicines/notifications/notifications.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../helpers/platform_flat_button.dart';
 import '../../screens/add_new_medicine/form_fields.dart';
 import '../../screens/add_new_medicine/medicine_type_card.dart';
@@ -21,7 +22,7 @@ class AddNewMedicine extends StatefulWidget {
 }
 
 class _AddNewMedicineState extends State<AddNewMedicine> {
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final Snackbar snackbar = Snackbar();
@@ -32,21 +33,16 @@ class _AddNewMedicineState extends State<AddNewMedicine> {
   //list of medicines forms objects
   final List<MedicineType> medicineTypes = [
     MedicineType("Syrup", Image.asset("assets/images/syrup.png"), true),
-    MedicineType(
-        "Pill", Image.asset("assets/images/pills.png"), false),
-    MedicineType(
-        "Capsule", Image.asset("assets/images/capsule.png"), false),
-    MedicineType(
-        "Cream", Image.asset("assets/images/cream.png"), false),
-    MedicineType(
-        "Drops", Image.asset("assets/images/drops.png"), false),
-    MedicineType(
-        "Syringe", Image.asset("assets/images/syringe.png"), false),
+    MedicineType("Pill", Image.asset("assets/images/pills.png"), false),
+    MedicineType("Capsule", Image.asset("assets/images/capsule.png"), false),
+    MedicineType("Cream", Image.asset("assets/images/cream.png"), false),
+    MedicineType("Drops", Image.asset("assets/images/drops.png"), false),
+    MedicineType("Syringe", Image.asset("assets/images/syringe.png"), false),
   ];
 
   //-------------Pill object------------------
   int howManyWeeks = 1;
-  String selectWeight;
+  late String selectWeight;
   DateTime setDate = DateTime.now();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
@@ -107,8 +103,8 @@ class _AddNewMedicineState extends State<AddNewMedicine> {
                   "Add Pills",
                   style: Theme.of(context)
                       .textTheme
-                      .headline3
-                      .copyWith(color: Colors.black),
+                      .displaySmall
+                      ?.copyWith(color: Colors.black),
                 )),
               ),
               SizedBox(
@@ -302,20 +298,21 @@ class _AddNewMedicineState extends State<AddNewMedicine> {
   }
 
   //=======================================================================================================
-
+  int count = 1;
   //--------------------------------------SAVE PILL IN DATABASE---------------------------------------
   Future savePill() async {
     //check if medicine time is lower than actual time
     if (setDate.millisecondsSinceEpoch <=
         DateTime.now().millisecondsSinceEpoch) {
-      snackbar.showSnack(
-          "Check your medicine time and date", _scaffoldKey, null);
     } else {
       //create pill object
       Pill pill = Pill(
+          id: count++,
           amount: amountController.text,
           howManyWeeks: howManyWeeks,
-          medicineForm: medicineTypes[medicineTypes.indexWhere((element) => element.isChoose == true)].name,
+          medicineForm: medicineTypes[medicineTypes
+                  .indexWhere((element) => element.isChoose == true)]
+              .name,
           name: nameController.text,
           time: setDate.millisecondsSinceEpoch,
           type: selectWeight,
@@ -326,13 +323,18 @@ class _AddNewMedicineState extends State<AddNewMedicine> {
         dynamic result =
             await _repository.insertData("Pills", pill.pillToMap());
         if (result == null) {
-          snackbar.showSnack("Something went wrong", _scaffoldKey, null);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("something went wrong")),
+          );
           return;
         } else {
           //set the notification schneudele
           tz.initializeTimeZones();
           tz.setLocalLocation(tz.getLocation('Europe/Warsaw'));
-          await _notifications.showNotification(pill.name, pill.amount + " " + pill.medicineForm + " " + pill.type, time,
+          await _notifications.showNotification(
+              pill.name,
+              pill.amount + " " + pill.medicineForm + " " + pill.type,
+              time,
               pill.notifyId,
               flutterLocalNotificationsPlugin);
           setDate = setDate.add(Duration(milliseconds: 604800000));
@@ -341,7 +343,9 @@ class _AddNewMedicineState extends State<AddNewMedicine> {
         }
       }
       //---------------------------------------------------------------------------------------
-      snackbar.showSnack("Saved", _scaffoldKey, null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Medicine Saved")),
+      );
       Navigator.pop(context);
     }
   }

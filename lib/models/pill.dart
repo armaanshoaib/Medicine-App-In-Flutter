@@ -9,14 +9,14 @@ class Pill {
   int notifyId;
 
   Pill(
-      {this.id,
-      this.howManyWeeks,
-      this.time,
-      this.amount,
-      this.medicineForm,
-      this.name,
-      this.type,
-      this.notifyId});
+      {required this.id,
+      required this.howManyWeeks,
+      required this.time,
+      required this.amount,
+      required this.medicineForm,
+      required this.name,
+      required this.type,
+      required this.notifyId});
 
   //------------------set pill to map-------------------
 
@@ -49,17 +49,28 @@ class Pill {
   }
 //=====================================================================
 
-
   //---------------------| Get the medicine image path |-------------------------
-  String get image{
-    switch(this.medicineForm){
-      case "Syrup": return "assets/images/syrup.png"; break;
-      case "Pill":return "assets/images/pills.png"; break;
-      case "Capsule":return "assets/images/capsule.png"; break;
-      case "Cream":return "assets/images/cream.png"; break;
-      case "Drops":return "assets/images/drops.png"; break;
-      case "Syringe":return "assets/images/syringe.png"; break;
-      default : return "assets/images/pills.png"; break;
+  String get image {
+    switch (this.medicineForm) {
+      case "Syrup":
+        return "assets/images/syrup.png";
+
+      case "Pill":
+        return "assets/images/pills.png";
+
+      case "Capsule":
+        return "assets/images/capsule.png";
+
+      case "Cream":
+        return "assets/images/cream.png";
+      case "Drops":
+        return "assets/images/drops.png";
+
+      case "Syringe":
+        return "assets/images/syringe.png";
+
+      default:
+        return "assets/images/pills.png";
     }
   }
   //=============================================================================

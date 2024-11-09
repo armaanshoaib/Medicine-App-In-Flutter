@@ -1,49 +1,91 @@
+// import 'package:medicines/database/pills_database.dart';
+// import 'package:sqflite/sqflite.dart';
 
+// class Repository {
+//   PillsDatabase _pillsDatabase = PillsDatabase();
+//   static Database? _database;
 
-import 'package:medicine/database/pills_database.dart';
+//   //init database
+//   Future<Database?> get database async {
+//     return _database;
+//     _database = await _pillsDatabase.setDatabase();
+//     return _database;
+//   }
+
+//   //insert something to database
+//   Future<int?> insertData(String table, Map<String, dynamic> data) async {
+//     Database? db = await database;
+//     try {
+//       return await db?.insert(table, data);
+//     } catch (e) {
+//       return null;
+//     }
+//   }
+
+//   //get all data from database
+//   Future<List<Map<String, dynamic>>?> getAllData(table) async {
+//     Database? db = await database;
+//     try {
+//       return db?.query(table);
+//     } catch (e) {
+//       return null;
+//     }
+//   }
+
+//   //delete data
+//   Future<int?> deleteData(String table, int id) async {
+//     Database? db = await database;
+//     try {
+//       return await db?.delete(table, where: "id = ?", whereArgs: [id]);
+//     } catch (e) {
+//       return null;
+//     }
+//   }
+// }
+
+// ---------------------------
+
+import 'package:medicines/database/pills_database.dart';
 import 'package:sqflite/sqflite.dart';
 
-class Repository{
-
+class Repository {
   PillsDatabase _pillsDatabase = PillsDatabase();
-  static Database _database;
+  static Database? _database;
 
   //init database
-  Future<Database> get database async{
-    if(_database != null) return _database;
+  Future<Database> get database async {
+    if (_database != null) return _database!;
     _database = await _pillsDatabase.setDatabase();
-    return _database;
+    return _database!;
   }
 
   //insert something to database
-  Future<int> insertData(String table,Map<String,dynamic> data) async{
+  Future<int?> insertData(String table, Map<String, dynamic> data) async {
     Database db = await database;
-    try{
+    try {
       return await db.insert(table, data);
-    }catch(e){
+    } catch (e) {
       return null;
     }
   }
 
   //get all data from database
-  Future<List<Map<String,dynamic>>> getAllData(table) async{
+  Future<List<Map<String, dynamic>>> getAllData(String table) async {
     Database db = await database;
-    try{
-      return db.query(table);
-    }catch(e){
-      return null;
+    try {
+      return await db.query(table);
+    } catch (e) {
+      return [];
     }
   }
 
   //delete data
-  Future<int> deleteData(String table,int id) async{
+  Future<int?> deleteData(String table, int id) async {
     Database db = await database;
-    try{
-      return await db.delete(table,where: "id = ?", whereArgs: [id]);
-    }catch(e){
+    try {
+      return await db.delete(table, where: "id = ?", whereArgs: [id]);
+    } catch (e) {
       return null;
     }
   }
-
-
 }

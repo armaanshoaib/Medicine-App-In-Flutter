@@ -1,76 +1,149 @@
-import 'package:medicine/models/pill.dart';
-import 'package:timezone/data/latest.dart' as tz;
+// import 'package:medicines/models/pill.dart';
+// import 'package:timezone/timezone.dart' as tz;
+// import 'package:flutter/material.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+// class Notifications {
+//   late BuildContext _context;
+
+//   Future<FlutterLocalNotificationsPlugin> initNotifies(
+//       BuildContext context) async {
+//     this._context = context;
+//     //-----------------------------| Inicialize local notifications |--------------------------------------
+//     var initializationSettingsAndroid =
+//         new AndroidInitializationSettings('app_icon');
+//     var initializationSettingsIOS = new IOSInitializationSettings();
+//     var initializationSettings = new InitializationSettings(
+//         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+//     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//         new FlutterLocalNotificationsPlugin();
+//     flutterLocalNotificationsPlugin.initialize(initializationSettings,
+//         onSelectNotification: onSelectNotification);
+//     return flutterLocalNotificationsPlugin;
+//     //======================================================================================================
+//   }
+
+//   //---------------------------------| Show the notification in the specific time |-------------------------------
+//   Future showNotification(String title, String description, int time, int id,
+//       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
+//     await flutterLocalNotificationsPlugin.zonedSchedule(
+//         id.toInt(),
+//         title,
+//         description,
+//         tz.TZDateTime.now(tz.local).add(Duration(milliseconds: time)),
+//         const NotificationDetails(
+//             android: AndroidNotificationDetails('medicines_id', 'medicines',
+//                 importance: Importance.high,
+//                 priority: Priority.high,
+//                 color: Colors.cyanAccent)),
+//         androidAllowWhileIdle: true,
+//         uiLocalNotificationDateInterpretation:
+//             UILocalNotificationDateInterpretation.absoluteTime);
+//   }
+
+//   //================================================================================================================
+
+//   //-------------------------| Cancel the notify |---------------------------
+//   Future removeNotify(int notifyId,
+//       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
+//     try {
+//       return await flutterLocalNotificationsPlugin.cancel(notifyId);
+//     } catch (e) {
+//       return null;
+//     }
+//   }
+
+//   //==========================================================================
+
+//   //-------------| function to inicialize local notifications |---------------------------
+//   Future onSelectNotification(String payload) async {
+//     showDialog(
+//       context: _context,
+//       builder: (_) {
+//         return new AlertDialog(
+//           title: Text("PayLoad"),
+//           content: Text("Payload : $payload"),
+//         );
+//       },
+//     );
+//   }
+// //======================================================================================
+// }
+
+// //=============================================//
+// //=============================================//
+
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class Notifications {
+  late BuildContext _context;
 
-  BuildContext _context;
-
-  Future<FlutterLocalNotificationsPlugin> initNotifies(BuildContext context) async{
+  Future<FlutterLocalNotificationsPlugin> initNotifies(
+      BuildContext context) async {
     this._context = context;
-    //-----------------------------| Inicialize local notifications |--------------------------------------
+
+    //-----------------------------| Initialize local notifications |--------------------------------------
     var initializationSettingsAndroid =
-    new AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
+        AndroidInitializationSettings('app_icon');
+    var initializationSettingsIOS =
+        DarwinInitializationSettings(); // Updated to DarwinInitializationSettings
+    var initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
+        onDidReceiveNotificationResponse:
+            onSelectNotification); // Updated callback
     return flutterLocalNotificationsPlugin;
     //======================================================================================================
   }
 
-
-
   //---------------------------------| Show the notification in the specific time |-------------------------------
-  Future showNotification(String title, String description, int time, int id, FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
+  Future showNotification(String title, String description, int time, int id,
+      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
-        id.toInt(),
+        id,
         title,
         description,
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
         tz.TZDateTime.now(tz.local).add(Duration(milliseconds: time)),
         const NotificationDetails(
-            android: AndroidNotificationDetails(
-                'medicines_id', 'medicines', 'medicines_notification_channel',
+            android: AndroidNotificationDetails('medicines_id', 'medicines',
                 importance: Importance.high,
                 priority: Priority.high,
                 color: Colors.cyanAccent)),
-        androidAllowWhileIdle: true,
         uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime);
+            UILocalNotificationDateInterpretation.absoluteTime);
   }
 
   //================================================================================================================
 
-
   //-------------------------| Cancel the notify |---------------------------
-  Future removeNotify(int notifyId, FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async{
-    try{
+  Future removeNotify(int notifyId,
+      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
+    try {
       return await flutterLocalNotificationsPlugin.cancel(notifyId);
-    }catch(e){
+    } catch (e) {
       return null;
     }
   }
 
   //==========================================================================
 
-
-  //-------------| function to inicialize local notifications |---------------------------
-  Future onSelectNotification(String payload) async {
+  //-------------| function to initialize local notifications |---------------------------
+  void onSelectNotification(NotificationResponse notificationResponse) async {
+    // Updated callback
     showDialog(
       context: _context,
       builder: (_) {
-        return new AlertDialog(
-          title: Text("PayLoad"),
-          content: Text("Payload : $payload"),
+        return AlertDialog(
+          title: const Text("Payload"),
+          content: Text("Payload : ${notificationResponse.payload}"),
         );
       },
     );
   }
-//======================================================================================
-
-
+  //======================================================================================
 }
